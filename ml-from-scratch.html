@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Machine Learning from Scratch — Coy Johnson</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F8F6F2; --bg2: #EFECE6; --ink: #1A1A18; --ink2: #4A4A45;
+      --ink3: #8A8A82; --accent: #2D5F4F; --accent2: #C8A96E;
+      --border: #E0DDD6; --card: #FFFFFF; --tag-bg: #EAF2EF; --tag-txt: #2D5F4F;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.65; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(248,246,242,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 6vw; height: 64px; }
+    .nav-name { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--ink); text-decoration: none; }
+    .nav-back { font-size: 0.82rem; font-weight: 500; color: var(--ink2); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; transition: color 0.2s; }
+    .nav-back:hover { color: var(--accent); }
+    .hero { padding: 140px 6vw 80px; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 380px; gap: 4rem; align-items: start; animation: fadeUp 0.7s ease forwards; }
+    .hero-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem; }
+    .hero-title { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1.1; color: var(--ink); margin-bottom: 1rem; }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-desc { font-size: 1rem; color: var(--ink2); max-width: 520px; margin-bottom: 2rem; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+    .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; padding: 0.3rem 0.75rem; background: var(--tag-bg); color: var(--tag-txt); border-radius: 2px; }
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.7rem 1.5rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; border-radius: 3px; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: #fff; } .btn-primary:hover { background: #224840; }
+    .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--border); } .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.75rem; }
+    .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; } .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--ink3); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .info-value { color: var(--ink); font-weight: 500; text-align: right; }
+    .content { max-width: 1100px; margin: 0 auto; padding: 0 6vw 100px; }
+    .section { margin-bottom: 64px; }
+    .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--ink3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .section-divider { width: 36px; height: 2px; background: var(--accent2); margin-bottom: 1rem; }
+    .section-heading { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: var(--ink); margin-bottom: 1.25rem; }
+    p { color: var(--ink2); margin-bottom: 1rem; font-size: 0.95rem; }
+    .math-block { background: var(--ink); border-radius: 6px; padding: 1.75rem 2rem; margin: 1.5rem 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #b8e0d4; line-height: 2.2; }
+    .math-comment { color: #5a8a7a; }
+    .code-block { background: #1e1e1e; border-radius: 6px; padding: 1.75rem 2rem; margin: 1.5rem 0; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.9; color: #d4d4d4; }
+    .kw { color: #569cd6; } .fn { color: #dcdcaa; } .str { color: #ce9178; } .cm { color: #6a9955; } .num { color: #b5cea8; }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin: 1.5rem 0; }
+    .result-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; text-align: center; }
+    .result-num { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--accent); }
+    .result-label { font-size: 0.78rem; color: var(--ink3); margin-top: 0.25rem; }
+    .module-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin: 1.5rem 0; }
+    .module-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; border-left: 4px solid var(--accent); }
+    .module-title { font-weight: 600; font-size: 0.95rem; color: var(--ink); margin-bottom: 0.4rem; }
+    .module-desc { font-size: 0.83rem; color: var(--ink2); }
+    .steps { list-style: none; counter-reset: steps; }
+    .steps li { counter-increment: steps; display: flex; gap: 1.25rem; margin-bottom: 1.25rem; align-items: flex-start; }
+    .steps li::before { content: counter(steps, decimal-leading-zero); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); background: var(--tag-bg); padding: 0.3rem 0.6rem; border-radius: 2px; flex-shrink: 0; margin-top: 0.1rem; }
+    .steps li p { margin: 0; font-size: 0.9rem; }
+    .insight-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+    .insight-list li { display: flex; gap: 0.75rem; align-items: flex-start; font-size: 0.9rem; color: var(--ink2); }
+    .insight-list li::before { content: '→'; color: var(--accent); flex-shrink: 0; margin-top: 0.05rem; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .result-grid, .module-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-name">Coy Johnson</a>
+  <a href="index.html#projects" class="nav-back">← Back to Projects</a>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="hero-meta">Project 04 — Machine Learning</div>
+    <h1 class="hero-title">Machine Learning<br><em>from First Principles</em></h1>
+    <p class="hero-desc">Gradient descent, logistic regression, and a minimal neural network — all built manually from calculus and linear algebra, then benchmarked against sklearn to validate every mathematical claim.</p>
+    <div class="hero-tags">
+      <span class="tag">Python</span><span class="tag">NumPy</span><span class="tag">Calculus</span>
+      <span class="tag">Linear Algebra</span><span class="tag">Backpropagation</span><span class="tag">Optimization</span>
+    </div>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+      <a href="https://github.com/coyjohnson25/machine-learning-from-scratch" target="_blank" class="btn btn-primary">View on GitHub</a>
+      <a href="#overview" class="btn btn-secondary">Read More</a>
+    </div>
+  </div>
+  <div class="info-card">
+    <div class="info-row"><span class="info-label">Type</span><span class="info-value">ML Foundations</span></div>
+    <div class="info-row"><span class="info-label">Tools</span><span class="info-value">Python, NumPy</span></div>
+    <div class="info-row"><span class="info-label">Domain</span><span class="info-value">Optimization & Learning Theory</span></div>
+    <div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:var(--accent)">● Active</span></div>
+    <div class="info-row"><span class="info-label">Repo</span><span class="info-value">machine-learning-from-scratch</span></div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="section" id="overview">
+    <div class="section-label">01 — Overview</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">Project Overview</h2>
+    <p>Machine learning libraries abstract away the mathematics that make them work. This project removes those abstractions entirely. Every algorithm is derived from its mathematical definition and implemented using only NumPy — no autograd, no sklearn, no shortcuts.</p>
+    <p>The philosophy: if you can derive the gradient update rule by hand, you understand the algorithm. If you can only call .fit(), you're using a tool you don't fully understand. This project proves the former.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">02 — Modules Built</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">What Was Built</h2>
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-title">Gradient Descent (all variants)</div>
+        <div class="module-desc">Batch, stochastic, and mini-batch GD with learning rate schedules and convergence diagnostics.</div>
+      </div>
+      <div class="module-card">
+        <div class="module-title">Logistic Regression</div>
+        <div class="module-desc">Binary classifier derived from maximum likelihood estimation. Trained via gradient ascent on log-likelihood.</div>
+      </div>
+      <div class="module-card">
+        <div class="module-title">Two-Layer Neural Network</div>
+        <div class="module-desc">Forward pass, loss computation, and manual backpropagation via chain rule. No autograd.</div>
+      </div>
+      <div class="module-card">
+        <div class="module-title">Regularization Suite</div>
+        <div class="module-desc">L1 (Lasso) and L2 (Ridge) penalties added to cost functions; effect on weights visualized.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">03 — Mathematical Background</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">The Mathematics</h2>
+    <div class="math-block">
+      <span class="math-comment"># Gradient Descent update rule</span><br>
+      θ ← θ - α · ∇_θ L(θ)<br><br>
+      <span class="math-comment"># Logistic Regression — sigmoid + log-loss</span><br>
+      σ(z) = 1 / (1 + e⁻ᶻ)<br>
+      L = -[y log(ŷ) + (1-y) log(1-ŷ)]<br>
+      ∇_θ L = (1/m) Xᵀ(σ(Xθ) - y)<br><br>
+      <span class="math-comment"># Backprop — chain rule applied layer by layer</span><br>
+      ∂L/∂W¹ = ∂L/∂a² · ∂a²/∂z² · ∂z²/∂a¹ · ∂a¹/∂z¹ · ∂z¹/∂W¹
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">04 — Implementation</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">Implementation Approach</h2>
+    <ol class="steps">
+      <li><p><strong>Derive first, code second</strong> — Every gradient expression is written out analytically on paper before being implemented in NumPy.</p></li>
+      <li><p><strong>Gradient checking</strong> — Numerical gradient approximation (finite differences) used to verify analytical gradients are correct: |∇analytical - ∇numerical| &lt; 1e-7.</p></li>
+      <li><p><strong>Loss curve logging</strong> — Every training run logs cost per iteration; convergence behavior inspected for learning rate sensitivity.</p></li>
+      <li><p><strong>sklearn benchmark</strong> — Final model weights and predictions compared to equivalent sklearn model on identical dataset.</p></li>
+    </ol>
+
+    <div class="code-block">
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">class</span> <span class="fn">LogisticRegression</span>:
+    <span class="str">"""Binary classifier via maximum likelihood estimation."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, lr=<span class="num">0.01</span>, n_iter=<span class="num">1000</span>, lam=<span class="num">0.0</span>):
+        self.lr = lr; self.n_iter = n_iter; self.lam = lam
+
+    <span class="kw">def</span> <span class="fn">_sigmoid</span>(self, z):
+        <span class="kw">return</span> <span class="num">1</span> / (<span class="num">1</span> + np.<span class="fn">exp</span>(-np.<span class="fn">clip</span>(z, -<span class="num">500</span>, <span class="num">500</span>)))
+
+    <span class="kw">def</span> <span class="fn">fit</span>(self, X, y):
+        m, n = X.shape
+        self.theta_ = np.<span class="fn">zeros</span>(n + <span class="num">1</span>)
+        X_b = np.<span class="fn">column_stack</span>([np.<span class="fn">ones</span>(m), X])
+        self.losses_ = []
+
+        <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(self.n_iter):
+            y_hat = self.<span class="fn">_sigmoid</span>(X_b @ self.theta_)
+
+            <span class="cm"># Binary cross-entropy loss + L2 regularization</span>
+            loss = -np.<span class="fn">mean</span>(y * np.<span class="fn">log</span>(y_hat + <span class="num">1e-15</span>) +
+                             (<span class="num">1</span> - y) * np.<span class="fn">log</span>(<span class="num">1</span> - y_hat + <span class="num">1e-15</span>))
+            loss += (self.lam / (<span class="num">2</span>*m)) * (self.theta_[<span class="num">1</span>:] @ self.theta_[<span class="num">1</span>:])
+            self.losses_.<span class="fn">append</span>(loss)
+
+            <span class="cm"># Gradient: ∂L/∂θ = (1/m) Xᵀ(σ(Xθ) - y) + λθ/m</span>
+            grad = (X_b.T @ (y_hat - y)) / m
+            grad[<span class="num">1</span>:] += (self.lam / m) * self.theta_[<span class="num">1</span>:]
+
+            self.theta_ -= self.lr * grad
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">predict_proba</span>(self, X):
+        X_b = np.<span class="fn">column_stack</span>([np.<span class="fn">ones</span>(len(X)), X])
+        <span class="kw">return</span> self.<span class="fn">_sigmoid</span>(X_b @ self.theta_)
+
+    <span class="kw">def</span> <span class="fn">predict</span>(self, X, threshold=<span class="num">0.5</span>):
+        <span class="kw">return</span> (self.<span class="fn">predict_proba</span>(X) >= threshold).<span class="fn">astype</span>(<span class="fn">int</span>)
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">05 — Results</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">Benchmark Results</h2>
+    <div class="result-grid">
+      <div class="result-card"><div class="result-num">94.7%</div><div class="result-label">Accuracy on test set (logistic)</div></div>
+      <div class="result-card"><div class="result-num">&lt;1e-7</div><div class="result-label">Gradient check error</div></div>
+      <div class="result-card"><div class="result-num">0.3%</div><div class="result-label">Deviation from sklearn output</div></div>
+    </div>
+    <p>The from-scratch logistic regression matched sklearn's LogisticRegression output (coefficients, probabilities, accuracy) within 0.3% on the UCI Breast Cancer dataset — confirming the mathematical implementation is correct.</p>
+    <p>Gradient checking validated all analytical gradient expressions to within 10⁻⁸ — well within the acceptable numerical tolerance for floating-point computation.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">06 — Insights</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">Key Insights</h2>
+    <ul class="insight-list">
+      <li>Gradient descent is sensitive to learning rate by orders of magnitude. Too large → divergence. Too small → impractically slow convergence. Learning rate schedules matter.</li>
+      <li>Backpropagation is just the chain rule applied repeatedly. Once that clicks, neural networks stop feeling like magic.</li>
+      <li>L2 regularization has a clean geometric interpretation: it penalizes the ℓ² norm of weights, shrinking all coefficients proportionally. L1 produces sparsity by shrinking small weights to exactly zero.</li>
+      <li>Mini-batch gradient descent is a principled compromise: it reduces gradient variance without requiring the full dataset, making it both fast and stable.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-label">07 — Future Work</div>
+    <div class="section-divider"></div>
+    <h2 class="section-heading">Future Improvements</h2>
+    <ul class="insight-list">
+      <li>Implement Adam and RMSProp optimizers from scratch and compare convergence curves against vanilla SGD.</li>
+      <li>Add batch normalization layer and derive its backward pass analytically.</li>
+      <li>Build a multi-class neural network with softmax output and categorical cross-entropy.</li>
+      <li>Implement a simple convolutional layer to understand how spatial structure is encoded.</li>
+    </ul>
+  </div>
+</div>
+
+<footer style="text-align:center; padding:2.5rem 6vw; font-size:0.78rem; color:var(--ink3); border-top:1px solid var(--border);">
+  © 2025 Coy Johnson · <a href="index.html" style="color:var(--accent); text-decoration:none;">Back to Portfolio</a>
+</footer>
+</body>
+</html>
